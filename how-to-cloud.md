@@ -171,17 +171,6 @@ sensitive libraries, such as the Intel MKL (Matrix Kernel Library), you will
 notice that 2 vCores combined have performance comparable to 1 physical CPU core
 (e.g. a core in the Broad cluster).
 
-# Glossary
-
-- *AWS* Amazon Web Services
-- *GCE* Google Compute Engine, GCP's VM service
-- *GCP* Google Cloud Platform
-- *GCS* Google Cloud Storage
-- *GS* see GCS
-- *gs://* see GCS
-- *S3* Amazon's [Simple Storage Service](https://en.wikipedia.org/wiki/Amazon_S3)
-- *VM* [Virtual Machine](https://en.wikipedia.org/wiki/Virtual_machine)
-
 # Resources
 
 - Julia Evans' [comics about SSH, cURL and others](https://jvns.ca/blog/2019/02/10/a-few-networking-tool-comics/)

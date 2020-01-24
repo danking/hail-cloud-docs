@@ -217,6 +217,4 @@ hailctl dataproc modify --num-preemptible-workers N --num-workers 0
 hailctl dataproc submit step3.py
 ```
 
-# Glossary
-
 # Resources
