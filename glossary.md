@@ -27,7 +27,7 @@ see GCS
 </dd>
 <dt>HT</dt>
 <dd>
-Hail Table, a distributed hail dataset like a pandas DataFrame
+Hail Table, a distributed Hail dataset like a pandas DataFrame
 </dd>
 <dt>MT</dt>
 <dd>
