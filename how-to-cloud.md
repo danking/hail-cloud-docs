@@ -32,6 +32,12 @@ identified by a bucket name and a hierarchical path:
 gs://bucket/folder1/folder2/folder3/file
 ```
 
+However, beware: most bucket storage systems, including GCS, pervasively *do
+not* support traditional hierarchical features. For example, "setting
+permissions on a folder" is simulated by recursively setting permissions on
+every object in the folder, this takes a lot longer than running a single
+operation on a folder on a normal file system!
+
 The rest of this document assumes you're using Google Cloud Platform, the
 more common cloud provider at the Broad.
 
