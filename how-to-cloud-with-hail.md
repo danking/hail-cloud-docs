@@ -89,20 +89,29 @@ If you need help, post the log and the *full* stack trace to
 https://discuss.hail.is and someone from the development team will answer you
 question as soon as possible. We often respond within the hour.
 
-# Partitioning
-
-????
-
-# Efficiently Using Hail
+## Efficiently Using Hail
 
 We focus primarily on monetary efficiency.
 
-## Preemptible Workers
+### Partitioning
+
+When you `write` a Hail MatrixTable or Table, it is, effectively, stored as a folder
+of *partitions*. Each partition can, in principle, be processed by a different
+core of a cluster. If you have more cores than partitions, then some cores must
+have no work to do because Hail cannot split the work on a MatrixTable or Table
+into more pieces than there are partitions.
+
+A partition must contain at least one row of a MatrixTable or Table and should
+usually contain many more. Hail has some per-partition overhead, so we recommend
+that your partitions are at least 128 Megabytes in size.
+
+### Preemptible Workers
 
 Many hail operations will succeed with preemptible workers. Specifically, any
 operation which is entirely "row-parallel" (there is no sharing of information
-across rows) will succeed with preemptible workers. For example, counting the
-number of missing genotypes at every locus is row-parallel:
+across rows and, in particular, across partitions) will succeed with preemptible
+workers. For example, counting the number of missing genotypes at every locus is
+row-parallel:
 
 ```
 mt.annotate_rows(n_missing = hl.agg.count_where(hl.is_missing(mt.GT)))
@@ -138,7 +147,23 @@ hours, a cluster of any size will likely not complete a *non*-row-parallel
 operation that takes two or more hours. In general, do not use preemptible
 machines for a long running non-row-parallel operation.
 
-## Cluster Size
+### Shuffles
+
+Some non-row-parallel operations, like `annotate_cols` have limited dependencies
+between rows and partitions. Other non-row-parallel operations require transfer
+of data between each partition and every other partition. For example,
+`key_rows_by` requires the dataset is ordered by the new row keys. In general,
+any one input-partition might need to send a different row to every other
+output-partition. In analogy to the process of shuffling a deck of cards, these
+operations are called "shuffles". Hail is designed to avoid shuffles when
+possible.
+
+Unlike other non-row-parallel operations (like `annotate_cols`), a shuffle will
+*almost never* succeed on a cluster containing *even one* preemptible
+worker. For this reason, we recommend using exclusive non-preemptible workers
+when performing a shuffle.
+
+### Cluster Size
 
 Many Hail operations scale nearly linearly in core count. That means if you
 double the cores, you nearly halve the wall-clock time (the time you wait for an
@@ -151,13 +176,13 @@ Under only this constraint, the ideal cluster size is equal to the number of
 partitions in our dataset. However, when cluster size is equal to the number of
 partitions, we must pay the hourly cost of the entire cluster for the length of
 the longest running partition. If every partition took the same amount of time,
-this would be OK. In practice, datasets are partitions are not uniform in size
-and iterative operations (like logistic regression) take unpredictably varying
+this would be OK. In practice, datasets partitions are not uniform in size and
+iterative operations (like logistic regression) take unpredictably varying
 amounts of time per partition. To mitigate this effect we set cluster size to
 some small integer fraction of partition size. This small integer is often
 three, four, or five.
 
-## Dynamic Cluster Size
+### Dynamic Cluster Size
 
 If your cluster is idle (because you are thinking, you switched to a smaller
 dataset, etc.), you can set it to a smaller size:
@@ -167,8 +192,8 @@ hailctl dataproc modify --num-preemptible-workers N --num-workers M
 ```
 
 If you have a series of row-parallel operations (see above) followed by a
-non-row-parallel operation (e.g. `group_rows_by`), followed by more row-parallel
-operations, you should consider dynamically changing your choice of
+shuffle operation (e.g. `group_rows_by`, `key_rows_by`), followed by more
+row-parallel operations, you should consider dynamically changing your choice of
 preemptibility. You must first split your pipeline into three steps:
 
 `step1.py`
@@ -217,4 +242,62 @@ hailctl dataproc modify --num-preemptible-workers N --num-workers 0
 hailctl dataproc submit step3.py
 ```
 
-# Resources
+This same strategy can be used for Hail pipeline that contain some operations
+that need many workers and some operations that need few workers.
+
+### Estimating Time and Cost
+
+#### Estimating Time
+
+Estimating the time and cost of a Hail operation is simple. Start a small
+cluster and use `filter_rows` to read a small fraction of the data:
+
+```
+test_mt = mt.filter_rows(mt.locus.contig == '22')
+print(mt.count_rows() / test_mt.count_rows())
+```
+
+Multiply the time spent computing results on this smaller dataset by the number
+printed. This yields a reasonable expectation of the time to compute results on
+the full dataset using a cluster of the same size.
+
+#### Estimating Cost
+
+Google charges by the core-hour, so we can convert so-called "wall clock time"
+(time elapsed from starting the cluster to stopping the cluster) to
+dollars-spent by multiplying it by the number of cores of each type and the
+price per core per hour of each type. At time of writing preemptible cores are
+[0.01 dollars per core hour and non-preemptible cores are 0.0475 dollars per
+core hour](https://cloud.google.com/compute/vm-instance-pricing). Moreover, each
+core has an additional [0.01 dollar "dataproc premium"
+fee](https://cloud.google.com/dataproc/pricing?hl=th). The cost of CPU cores for
+a cluster with an 8-core leader node; two non-preemptible, 8-core workers; and
+10 preemptible, 8-core workers running for 2 hours costs:
+
+```
+2 * (2  * 8 * 0.0575 +  # non-preemptible workers
+     10 * 8 * 0.02 +   # preemptible workers
+     1  * 8 * 0.0575)   # master node
+```
+
+2.98 dollars.
+
+There are additional charges for persistent disk and SSDs. If your leader node
+has 100 GB and your worker nodes have 40 GB each you can expect a modest
+increase in cost, slightly less than a dollar. The cost per disk is prorated
+from a per-month rate, at time of writing it is [0.04 USD per GB per
+month](https://cloud.google.com/compute/disks-image-pricing#persistentdisk). SSDs
+are more than four times as expensive.
+
+In general, once you know the wall clock time of your job, you can enter your
+cluster parameters into the [Google Cloud Pricing
+Calculator](https://cloud.google.com/products/calculator/) and get a precise
+estimate of cost using the latest prices.
+
+#### Scaling And Cost
+
+Hail aims to provide near-perfect scaling. This means that if you double the
+number of partitions and cores the job will finish in half as much time *for the
+same cost*. In practice, there is a slight increase in cost when using many more
+cores. Generally, the increase in cost is worth the enhanced productivity of
+you, the analyst because your time is very expensive!

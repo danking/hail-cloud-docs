@@ -7,7 +7,7 @@ terminal / shell / command-line. If you're unfamiliar with these things, you
 might find [Digital Ocean's Linux tutorials
 helpful](https://www.digitalocean.com/community/tutorial_series/getting-started-with-linux),
 particularly the [introduction to the linux
-terminal](https://www.digitalocean.com/community/tutorials/an-introduction-to-the-linux-terminal)
+terminal](https://www.digitalocean.com/community/tutorials/an-introduction-to-the-linux-terminal).
 
 ## What is the Cloud?
 
@@ -20,8 +20,8 @@ The services provided by different cloud providers varies, but they almost
 always include: virtual machines (e.g. Amazon EC2, Google Compute Engine) and
 bucket storage (e.g. Amazon S3, Google Cloud Storage). A virtual machine appears
 to you as a normal computer, like your laptop. In fact, you are sharing a
-computer in a secure, isolated manner. In the cloud, you usually pay a
-per-second, per-core price.
+computer in a secure, isolated manner. In the cloud, you usually pay a flat
+per-second, per-core rate.
 
 Bucket storage stores files independently of any virtual machine. In general, a
 file is identified by a bucket name and a unique key. Google Cloud Storage (GCS,
@@ -67,8 +67,7 @@ gcloud config get-value --help
 
 If the documentation is too large to fit in your terminal window (it almost
 always is), `gcloud` will display the documentation through a tool called
-[`less`](https://en.wikipedia.org/wiki/Less_(Unix)), you can find a description
-of the keys used to move up and down at Less's Wikipedia page.
+[`less`](https://en.wikipedia.org/wiki/Less_(Unix)).
 
 ### Virtual Machines in GCP
 
@@ -118,8 +117,8 @@ VM swap the argument order:
 gcloud compute scp /path/to/file your-name-here-test:/path/to/destination/file
 ```
 
-When you're done you have two choices: stop and delete. If you stop a machine,
-you can `start` it again later. Any running processes will have been terminated,
+When you're done you have two choices: *stop* and *delete*. If you *stop* a machine,
+you can *start* it again later. Any running processes will have been terminated,
 but the hard drive, all installed programs, and any copied files are still
 present. In return for this, you continue to pay for the hard drive!
 
@@ -160,7 +159,12 @@ gsutil du -sh gs://hail-1kg/1kg-all.mt
 ```
 
 Note you must omit the trailing slash if you want the sum total size of the
-folder. If you include the slash, it will always print `0B`.
+folder. If you include the slash, it will always print `0B`. The cost to store
+one gigabyte of data for one month in Google Cloud Storage at the time of
+writing this document is 0.026 dollars. [Check the latest
+price](https://cloud.google.com/storage/pricing) for "standard storage", that is
+the kind of storage you'll primarily use.
+
 
 ### Does a vCore correspond to a physical CPU?
 
