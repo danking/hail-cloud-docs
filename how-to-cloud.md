@@ -36,10 +36,10 @@ However, beware: most bucket storage systems, including GCS, pervasively *do
 not* support traditional hierarchical features. For example, "setting
 permissions on a folder" is simulated by recursively setting permissions on
 every object in the folder, this takes a lot longer than running a single
-operation on a folder on a normal file system!
+operation on a folder on a normal file system! Every object in the folder will be treated as an individual link/object independent of the directories they are stored in. 
 
 The rest of this document assumes you're using Google Cloud Platform, the
-more common cloud provider at the Broad.
+more common cloud provider at the Broad Institute.
 
 ### Interacting with GCP
 
@@ -89,7 +89,7 @@ In addition to machine configuration, every GCP virtual machine is either
 "non-preemptible"](https://cloud.google.com/compute/docs/instances/preemptible). A
 preemptible VM is roughly one-fifth the per-hour cost of a non-preemptible
 VM. In return for this cheap price, Google reserves the right to shut the VM
-down with seconds of notice. Generally, if you're starting a VM yourself for
+down with seconds of notice. This would happen in the event of other users who have requested a non-preemptible machine and Google assigns the preemptible machine that you created to said user.  Generally, if you're starting a VM yourself for
 interactive analysis, you need a non-preemptible VM. Some applications,
 including [Hail](https://hail.is), can use preemptible VMs.
 
@@ -107,7 +107,7 @@ gcloud compute ssh your-name-here-test
 ```
 
 That starts a shell session on the virtual machine. You can end that connection
-by pressing control-d or typing `exit` and hitting enter.
+by pressing control-d on your keyboard or typing `exit` and hitting enter.
 
 From your laptop, you can run
 
@@ -128,8 +128,8 @@ you can *start* it again later. Any running processes will have been terminated,
 but the hard drive, all installed programs, and any copied files are still
 present. In return for this, you continue to pay for the hard drive!
 
-I lied earlier. This running `n1-standard-1` VM is actually costing 5 cents per
-hour (for the core) plus 4 cents *per month* (for the disk). That's roughly
+I lied earlier. As mentioned, running `n1-standard-1` VM is actually costing 5 cents per
+hour (for the core). With the cost of the disk, it would add 4 cents *per month* (for the disk). That's roughly
 six-thousandths of a cent per hour.
 
 Nonetheless, it is good practice to *delete* a virtual machine if you are
@@ -168,7 +168,7 @@ Note you must omit the trailing slash if you want the sum total size of the
 folder. If you include the slash, it will always print `0B`. The cost to store
 one gigabyte of data for one month in Google Cloud Storage at the time of
 writing this document is 0.026 dollars. [Check the latest
-price](https://cloud.google.com/storage/pricing) for "standard storage", that is
+price](https://cloud.google.com/storage/pricing) for "standard storage": that is
 the kind of storage you'll primarily use.
 
 
