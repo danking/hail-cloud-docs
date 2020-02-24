@@ -11,12 +11,12 @@ Tutorial](https://hail.is/docs/0.2/tutorials-landing.html) on your laptop. You
 do not need to have read the
 [Overview](https://hail.is/docs/0.2/overview/index.html), but if you find
 yourself confused by Hail expressions or unsure how to use Hail to solve your
-problem, read through that.
+problem, read through the [Overview] page.
 
 ## Hail on the Cloud
 
-This document will focus entirely on running Hail in GCP, though it is possible
-to run Hail on any Spark cluster whether Cloud-based or on-premises.
+This document will focus entirely on running Hail in the Google Cloud Platform (GCP), though it is possible
+to run Hail on any Spark cluster whether Cloud-based or on-premises/locally.
 
 The Hail Python library sends Hail jobs to a Spark cluster. A Spark cluster is a
 collection of machines for processing very large amounts of data. Every Spark
@@ -32,7 +32,7 @@ hailctl dataproc start your-name-here-test
 This creates a Google-managed Spark cluster named
 `your-name-here-test`. Google's Spark cluster management service is called
 Dataproc. Don't worry about cost yet! This cluster costs less than a dollar per
-hour, very cheap! It only has one leader node and two worker nodes.
+hour (very cheap)! It only has one leader node and two worker nodes.
 
 Any cluster started by `hailctl` has a Jupiter notebook server running
 on the leader node. Connect to this Jupyter notebook server:
@@ -53,10 +53,10 @@ mt.gt_stats.show()
 ```
 
 You should see some progress bars indicating the work underway on the
-cluster. Your cluster should have 12 compute cores. Why not 16? Dataproc uses 4
+cluster. Your cluster should have 12 compute cores. Dataproc uses 4
 cores of one worker node for its own purposes.
 
-When you're finished with the cluster, shut it down:
+When you're finished with the cluster, you can shut it down with:
 
 ```
 hailctl dataproc stop your-name-here-test
@@ -65,7 +65,7 @@ hailctl dataproc stop your-name-here-test
 ### Long-running Jobs
 
 At some point you'll want a job to run in the background while you are busy
-going to meetings, opening and closing your laptop, probably losing and gaining
+going to meetings, opening and closing your laptop, or probably losing and gaining
 a WiFi connection. Jupyter Notebooks do not handle this gracefully. If you have
 a long-running job, you can `submit` the job to the cluster:
 
@@ -75,7 +75,7 @@ hailctl dataproc submit your-name-here-test my-hail-script.py
 
 ### Reporting Errors
 
-If you encounter an error in your pipeline, make sure to save the logs! The hail
+If you encounter an error in your pipeline, make sure to save the logs! The Hail
 log file location is printed when Hail first runs a job. The file path is a file
 path on the leader node of the cluster, so you must copy it off the leader node:
 
@@ -97,17 +97,17 @@ We focus primarily on monetary efficiency.
 
 When you `write` a Hail MatrixTable or Table, it is, effectively, stored as a folder
 of *partitions*. Each partition can, in principle, be processed by a different
-core of a cluster. If you have more cores than partitions, then some cores must
+core of a cluster. If you have more cores than partitions, some cores must
 have no work to do because Hail cannot split the work on a MatrixTable or Table
 into more pieces than there are partitions.
 
 A partition must contain at least one row of a MatrixTable or Table and should
 usually contain many more. Hail has some per-partition overhead, so we recommend
-that your partitions are at least 128 Megabytes in size.
+that your partitions are at least 128 megabytes in size.
 
 ### Preemptible Workers
 
-Many hail operations will succeed with preemptible workers. Specifically, any
+Many Hail operations will succeed with preemptible workers. Specifically, any
 operation which is entirely "row-parallel" (there is no sharing of information
 across rows and, in particular, across partitions) will succeed with preemptible
 workers. For example, counting the number of missing genotypes at every locus is
@@ -166,7 +166,7 @@ when performing a shuffle.
 ### Cluster Size
 
 Many Hail operations scale nearly linearly in core count. That means if you
-double the cores, you nearly halve the wall-clock time (the time you wait for an
+double the cores, you nearly half the wall-clock time (the time you wait for an
 answer). Instead of ten cores working for one hour, twenty cores work for two hours,
 each core doing half as much work. However, Hail cannot use more cores than
 there are partitions of our dataset because Hail cannot split a partition into
@@ -175,8 +175,7 @@ pieces and give each piece to a different core.
 Under only this constraint, the ideal cluster size is equal to the number of
 partitions in our dataset. However, when cluster size is equal to the number of
 partitions, we must pay the hourly cost of the entire cluster for the length of
-the longest running partition. If every partition took the same amount of time,
-this would be OK. In practice, datasets partitions are not uniform in size and
+the longest running partition. In an ideal situation, every partition would take the same amount of time. In practice, datasets partitions are not uniform in size and
 iterative operations (like logistic regression) take unpredictably varying
 amounts of time per partition. To mitigate this effect we set cluster size to
 some small integer fraction of partition size. This small integer is often
@@ -191,7 +190,7 @@ dataset, etc.), you can set it to a smaller size:
 hailctl dataproc modify --num-preemptible-workers N --num-workers M
 ```
 
-If you have a series of row-parallel operations (see above) followed by a
+If you have a series of row-parallel operations (see above, Preemptible Workers section) followed by a
 shuffle operation (e.g. `group_rows_by`, `key_rows_by`), followed by more
 row-parallel operations, you should consider dynamically changing your choice of
 preemptibility. You must first split your pipeline into three steps:
@@ -266,13 +265,13 @@ the full dataset using a cluster of the same size.
 Google charges by the core-hour, so we can convert so-called "wall clock time"
 (time elapsed from starting the cluster to stopping the cluster) to
 dollars-spent by multiplying it by the number of cores of each type and the
-price per core per hour of each type. At time of writing preemptible cores are
+price per core per hour of each type. At time of writing, preemptible cores are
 [0.01 dollars per core hour and non-preemptible cores are 0.0475 dollars per
 core hour](https://cloud.google.com/compute/vm-instance-pricing). Moreover, each
 core has an additional [0.01 dollar "dataproc premium"
 fee](https://cloud.google.com/dataproc/pricing?hl=th). The cost of CPU cores for
 a cluster with an 8-core leader node; two non-preemptible, 8-core workers; and
-10 preemptible, 8-core workers running for 2 hours costs:
+10 preemptible, 8-core workers running for 2 hours would cost:
 
 ```
 2 * (2  * 8 * 0.0575 +  # non-preemptible workers
@@ -280,7 +279,7 @@ a cluster with an 8-core leader node; two non-preemptible, 8-core workers; and
      1  * 8 * 0.0575)   # master node
 ```
 
-2.98 dollars.
+US$ 2.98.
 
 There are additional charges for persistent disk and SSDs. If your leader node
 has 100 GB and your worker nodes have 40 GB each you can expect a modest
