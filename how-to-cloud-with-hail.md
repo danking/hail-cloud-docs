@@ -46,8 +46,9 @@ cost estimate.
 
 ## Hail on the Cloud
 
-This document will focus entirely on running Hail in GCP, though it is possible
-to run Hail on any Spark cluster whether Cloud-based or on-premises.
+This document will focus entirely on running Hail in Google Cloud Platform
+(GCP). Hail can also run in other Cloud-based Spark clusters, on-premises Spark
+clusters, and in "local mode" on a single machine.
 
 The Hail Python library sends Hail jobs to a Spark cluster. A Spark cluster is a
 collection of machines for processing very large amounts of data. Every Spark
@@ -63,7 +64,7 @@ hailctl dataproc start your-name-here-test
 This creates a Google-managed Spark cluster named
 `your-name-here-test`. Google's Spark cluster management service is called
 Dataproc. Don't worry about cost yet! This cluster costs less than a dollar per
-hour, very cheap! It only has one leader node and two worker nodes.
+hour. Very cheap! It only has one leader node and two worker nodes.
 
 Any cluster started by `hailctl` has a Jupyter notebook server running
 on the leader node. Connect to this Jupyter notebook server:
@@ -84,8 +85,8 @@ mt.gt_stats.show()
 ```
 
 You should see some progress bars indicating the work underway on the
-cluster. Your cluster should have 12 compute cores. Why not 16? Dataproc uses 4
-cores of one worker node for its own purposes.
+cluster. Your cluster should have twelve compute cores. Each worker has eight
+cores, but Dataproc uses four cores of one worker node for its own purposes.
 
 When you're finished with the cluster, shut it down:
 
@@ -106,7 +107,7 @@ hailctl dataproc submit your-name-here-test my-hail-script.py
 
 ### Reporting Errors
 
-If you encounter an error in your pipeline, make sure to save the logs! The hail
+If you encounter an error in your pipeline, make sure to save the logs! The Hail
 log file location is printed when Hail first runs a job. The file path is a file
 path on the leader node of the cluster, so you must copy it off the leader node:
 
@@ -122,7 +123,7 @@ question as soon as possible. We often respond within the hour.
 
 ## Efficiently Using Hail
 
-We focus primarily on monetary efficiency.
+We focus on ways to reduce, control, and predict cost.
 
 ### Partitioning
 
@@ -134,11 +135,11 @@ into more pieces than there are partitions.
 
 A partition must contain at least one row of a MatrixTable or Table and should
 usually contain many more. Hail has some per-partition overhead, so we recommend
-that your partitions are at least 128 Megabytes in size.
+that your partitions are at least 128 megabytes in size.
 
 ### Preemptible Workers
 
-Many hail operations will succeed with preemptible workers. Specifically, any
+Many Hail operations will succeed with preemptible workers. Specifically, any
 operation which is entirely "row-parallel" (there is no sharing of information
 across rows and, in particular, across partitions) will succeed with preemptible
 workers. For example, counting the number of missing genotypes at every locus is
@@ -206,8 +207,8 @@ pieces and give each piece to a different core.
 Under only this constraint, the ideal cluster size is equal to the number of
 partitions in our dataset. However, when cluster size is equal to the number of
 partitions, we must pay the hourly cost of the entire cluster for the length of
-the longest running partition. If every partition took the same amount of time,
-this would be OK. In practice, datasets' partitions are not uniform in size, and
+the longest running partition. Each partition ideally takes the same amount of
+time. In practice, datasets' partitions are not uniform in size, and
 iterative operations (like logistic regression) take unpredictably varying
 amounts of time per partition. To mitigate this effect we set cluster size to
 some small integer fraction of the number of partitions. This small integer is
@@ -222,10 +223,11 @@ dataset, etc.), you can set it to a smaller size:
 hailctl dataproc modify --num-preemptible-workers N --num-workers M
 ```
 
-If you have a series of row-parallel operations (see above) followed by a
-shuffle operation (e.g. `group_rows_by`, `key_rows_by`), followed by more
-row-parallel operations, you should consider dynamically changing your choice of
-preemptibility. You must first split your pipeline into three steps:
+If you have a series of row-parallel operations ([see
+above](#preemptible-workers)) followed by a shuffle operation
+(e.g. `group_rows_by`, `key_rows_by`), followed by more row-parallel operations,
+you should consider dynamically changing your choice of preemptibility. You must
+first split your pipeline into three steps:
 
 `step1.py`
 ```
@@ -297,13 +299,13 @@ the full dataset using a cluster of the same size.
 Google charges by the core-hour, so we can convert so-called "wall clock time"
 (time elapsed from starting the cluster to stopping the cluster) to
 dollars-spent by multiplying it by the number of cores of each type and the
-price per core per hour of each type. At time of writing preemptible cores are
+price per core per hour of each type. At time of writing, preemptible cores are
 [0.01 dollars per core hour and non-preemptible cores are 0.0475 dollars per
 core hour](https://cloud.google.com/compute/vm-instance-pricing). Moreover, each
 core has an additional [0.01 dollar "dataproc premium"
 fee](https://cloud.google.com/dataproc/pricing?hl=th). The cost of CPU cores for
 a cluster with an 8-core leader node; two non-preemptible, 8-core workers; and
-10 preemptible, 8-core workers running for 2 hours costs:
+10 preemptible, 8-core workers running for 2 hours is:
 
 ```
 2 * (2  * 8 * 0.0575 +  # non-preemptible workers
@@ -311,7 +313,7 @@ a cluster with an 8-core leader node; two non-preemptible, 8-core workers; and
      1  * 8 * 0.0575)   # master node
 ```
 
-2.98 dollars.
+2.98 USD.
 
 There are additional charges for persistent disk and SSDs. If your leader node
 has 100 GB and your worker nodes have 40 GB each you can expect a modest
