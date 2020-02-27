@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-Read the How to Cloud document first.
+Read [How to Cloud](./how-to-cloud.md) first.
 
 You should already have Hail installed on your laptop, see the [Hail
 installation documentation](https://hail.is/docs/0.2/getting_started.html). You
@@ -12,6 +12,27 @@ do not need to have read the
 [Overview](https://hail.is/docs/0.2/overview/index.html), but if you find
 yourself confused by Hail expressions or unsure how to use Hail to solve your
 problem, read through that.
+
+## Start Small
+
+The cloud has a reputation for easily burning lots of money. You don't want to
+be the person who spent ten thousand dollars one night without thinking about
+it. Luckily, it's easy to not be that person!
+
+Always start small. For Hail, this means using a two worker dataproc cluster and
+experimenting on a small fraction of the data. For genetic data, it's always a
+good idea to make sure your scripts work on chromosome 22 (the smallest one)
+before you try running on the entire genome! Hail's `hl.balding_nichols_model`
+creates a genotype dataset with configurable numbers of rows and columns.
+
+As you'll see later, the smallest Hail cluster costs about 3 dollars per hour
+(that's pretty cheap compared to your salary!). Each time you think you need to
+double the size of your cluster ask yourself: am I prepared to spend twice as
+much money per hour?
+
+Before running a big job (say, something that will cost a hundred dollars),
+re-read [Estimating Cost](#estimating-cost) and create a cost estimate and
+discuss it with your supervisor.
 
 ## Hail on the Cloud
 

@@ -171,6 +171,48 @@ writing this document is 0.026 dollars. [Check the latest
 price](https://cloud.google.com/storage/pricing) for "standard storage", that is
 the kind of storage you'll primarily use.
 
+#### Tagging a Bucket
+
+Most things in GCP, including cloud storage buckets, support "tags": key-value
+pairs, both which are arbitrary strings. In the Neale Lab, we use the tag key
+"bucket" to enable cost visibility. Be a good citizen of Neale Lab and tag all
+your buckets with the key "bucket" whose value is the bucket's name. For
+example, the following adds the bucket tag for a bucket named `ukbb-ldsc`.
+
+```
+gsutil label ch -l bucket:ukb-ldsc gs://ukbb-ldsc/
+```
+
+This might seem redundant, but, unfortunately, the Google billing UI cannot not
+segregate charges by bucket name. However, it *can* segregate charges by tag.
+
+#### Life cycle Management
+
+During analysis, we often generates lots of temporary intermediate data that we
+need for a few days, but is not necessary to keep forever. For this situation,
+Google supports automatic deletion of files in a bucket older than a specified
+age. In the Neale Lab, we encourage users to create and use buckets with
+auto-deletion policies. For example, the `ukbb-ldsc` project might have a bucket
+named `ukbb-ldsc-7day` that deletes files after 7 days. The following rule
+applies this life cycle policy.
+
+```
+cat >/tmp/ukbb-ldsc-lifecycle-configuration <<EOF
+{
+  "lifecycle": {
+    "rule": [{
+      "action": {"type": "Delete"},
+      "condition": {
+        "age": 7
+      }
+    }]
+  }
+}
+EOF
+gsutil lifecycle set /tmp/ukbb-ldsc-lifecycle-configuration gs://ukbb-ldsc-7day
+```
+
+Now create a 7day bucket for your project!
 
 ### Does a vCore correspond to a physical CPU?
 
@@ -180,6 +222,11 @@ should not matter to you; however, if you're using extremely performance
 sensitive libraries, such as the Intel MKL (Matrix Kernel Library), you will
 notice that 2 vCores combined have performance comparable to 1 physical CPU core
 (e.g. a core in the Broad cluster).
+
+### Next Steps
+
+- [How to Cloud with Hail](./how-to-cloud-with-hail.md)
+- [Table of Contents](./README.md)
 
 # Resources
 
