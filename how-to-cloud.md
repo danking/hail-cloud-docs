@@ -16,8 +16,8 @@ refers to the computer services provided by Google (Google Compute Platform
 (GCP)), Amazon (Amazon Web Services), Microsoft (Microsoft Azure), Alibaba
 (Alibaba Cloud), and others.
 
-The services provided by different cloud providers varies, but they almost
-always include: virtual machines (e.g. Amazon EC2, Google Compute Engine) and
+The services provided by different cloud providers vary, but they almost
+always include virtual machines (e.g. Amazon EC2, Google Compute Engine) and
 bucket storage (e.g. Amazon S3, Google Cloud Storage). A virtual machine appears
 to you as a normal computer, like your laptop. In fact, you are sharing a
 computer in a secure, isolated manner. In the cloud, you usually pay a flat
@@ -115,7 +115,7 @@ From your laptop, you can run
 gcloud compute scp your-name-here-test:/path/on/vm/to/file .
 ```
 
-To copy a file located at `/path/on/vm/to/file` to the current directory on your
+to copy a file located at `/path/on/vm/to/file` to the current directory on your
 laptop (run `pwd` to figure out your current directory). To send a file to the
 VM swap the argument order:
 
@@ -168,7 +168,7 @@ Note you must omit the trailing slash if you want the sum total size of the
 folder. If you include the slash, it will always print `0B`. The cost to store
 one gigabyte of data for one month in Google Cloud Storage at the time of
 writing this document is 0.026 dollars. [Check the latest
-price](https://cloud.google.com/storage/pricing) for "standard storage", that is
+price](https://cloud.google.com/storage/pricing) for "standard storage"; that is
 the kind of storage you'll primarily use.
 
 #### Tagging a Bucket
@@ -216,7 +216,7 @@ Now create a 7day bucket for your project!
 
 ### Does a vCore correspond to a physical CPU?
 
-At time of writing, a vCore in GCP corresponded to a [hardware
+At time of writing, a vCore in GCP corresponds to a [hardware
 hyper-thread](https://en.wikipedia.org/wiki/Hyper-threading). Generally, this
 should not matter to you; however, if you're using extremely performance
 sensitive libraries, such as the Intel MKL (Matrix Kernel Library), you will
