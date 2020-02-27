@@ -36,7 +36,9 @@ However, beware: most bucket storage systems, including GCS, pervasively *do
 not* support traditional hierarchical features. For example, "setting
 permissions on a folder" is simulated by recursively setting permissions on
 every object in the folder, this takes a lot longer than running a single
-operation on a folder on a normal file system! Every object in the folder will be treated as an individual link/object independent of the directories they are stored in. 
+operation on a folder on a normal file system! Every object in the folder will
+be treated as an individual link/object independent of the directories they are
+stored in.
 
 The rest of this document assumes you're using Google Cloud Platform, the
 more common cloud provider at the Broad Institute.
@@ -89,9 +91,11 @@ In addition to machine configuration, every GCP virtual machine is either
 "non-preemptible"](https://cloud.google.com/compute/docs/instances/preemptible). A
 preemptible VM is roughly one-fifth the per-hour cost of a non-preemptible
 VM. In return for this cheap price, Google reserves the right to shut the VM
-down with seconds of notice. This would happen in the event of other users who have requested a non-preemptible machine and Google assigns the preemptible machine that you created to said user.  Generally, if you're starting a VM yourself for
-interactive analysis, you need a non-preemptible VM. Some applications,
-including [Hail](https://hail.is), can use preemptible VMs.
+down with seconds of notice. This would happen in the event of other users who
+have requested a non-preemptible machine and Google assigns the preemptible
+machine that you created to said user.  Generally, if you're starting a VM
+yourself for interactive analysis, you need a non-preemptible VM. Some
+applications, including [Hail](https://hail.is), can use preemptible VMs.
 
 A small non-preemptible machine is really cheap, at time of writing it is 5
 cents per hour! Practice starting one named with your name suffixed by `-test`:
@@ -128,9 +132,9 @@ you can *start* it again later. Any running processes will have been terminated,
 but the hard drive, all installed programs, and any copied files are still
 present. In return for this, you continue to pay for the hard drive!
 
-I lied earlier. As mentioned, running `n1-standard-1` VM is actually costing 5 cents per
-hour (for the core). With the cost of the disk, it would add 4 cents *per month* (for the disk). That's roughly
-six-thousandths of a cent per hour.
+I lied earlier. The `n1-standard-1` VM we created earlier actually costs 5 cents
+per hour (for the core). Moreover, we must pay for the disk which is 4 cents
+*per month* (for the disk). That's roughly six-thousandths of a cent per hour.
 
 Nonetheless, it is good practice to *delete* a virtual machine if you are
 certain you will never need to use the same programs and files again:
