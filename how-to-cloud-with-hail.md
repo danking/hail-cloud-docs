@@ -20,19 +20,29 @@ be the person who spent ten thousand dollars one night without thinking about
 it. Luckily, it's easy to not be that person!
 
 Always start small. For Hail, this means using a two worker dataproc cluster and
-experimenting on a small fraction of the data. For genetic data, it's always a
-good idea to make sure your scripts work on chromosome 22 (the smallest one)
-before you try running on the entire genome! Hail's `hl.balding_nichols_model`
-creates a genotype dataset with configurable numbers of rows and columns.
+experimenting on a small fraction of the data. For genetic data, make sure your
+scripts work on chromosome 22 (the smallest one) before you try running on the
+entire genome! If you have a matrix table you can limit to chromosome 22 with
+`filter_rows`. Hail will make sure not to load data for other chromosomes.
+
+```
+import hail as hl
+
+mt = hl.read_matrix_table('gs://....')
+mt = mt.filter_rows(mt.locus.contig == '22')
+```
+
+Hail's `hl.balding_nichols_model` creates a random genotype dataset with
+configurable numbers of rows and columns. You can use these datasets for
+experimentation.
 
 As you'll see later, the smallest Hail cluster costs about 3 dollars per hour
 (that's pretty cheap compared to your salary!). Each time you think you need to
 double the size of your cluster ask yourself: am I prepared to spend twice as
 much money per hour?
 
-Before running a big job (say, something that will cost a hundred dollars),
-re-read [Estimating Cost](#estimating-cost) and create a cost estimate and
-discuss it with your supervisor.
+Before running a big job, re-read [Estimating Cost](#estimating-cost) and make a
+cost estimate.
 
 ## Hail on the Cloud
 
