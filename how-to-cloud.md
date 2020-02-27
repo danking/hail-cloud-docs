@@ -23,6 +23,9 @@ to you as a normal computer, like your laptop. In fact, you are sharing a
 computer in a secure, isolated manner. In the cloud, you usually pay a flat
 per-second, per-core rate.
 
+A virtual machine is also called a "machine" or a "node". Virtual machines
+contain one or more CPU cores variably called "cores" or "CPUs" or "CPU cores".
+
 Bucket storage stores files independently of any virtual machine. In general, a
 file is identified by a bucket name and a unique key. Google Cloud Storage (GCS,
 also known as GS or by its URI scheme `gs://`), is more flexible: a file is
