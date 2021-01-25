@@ -94,6 +94,10 @@ When you're finished with the cluster, shut it down:
 hailctl dataproc stop your-name-here-test
 ```
 
+### Labelling (Tagging)
+
+Similarly to Google Cloud Storage buckets, Google Dataproc clusters may have "labels" applied to them. A label is a key and a value, both of which are strings. Google [constrains the kinds of strings](https://cloud.google.com/dataproc/docs/guides/creating-managing-labels#requirements) that can be used for keys and values. `hailctl` automatically adds a label with the key `creator` and the value set to your Google Cloud user account with banned characters replaced by underscores. For example, if your Google Cloud account is `sam@broadinstitute.org`, then your dataproc clusters will have the label: `creator=sam_broadinstitute_org`. Google Dataproc [automatically adds a few labels](https://cloud.google.com/dataproc/docs/guides/creating-managing-labels#automatically_applied_labels), at time of writing this included `goog-dataproc-cluster-name`, `goog-dataproc-cluster-location`, and `goog-dataproc-cluster-uuid`. 
+
 ### Long-running Jobs
 
 At some point you'll want a job to run in the background while you are busy
