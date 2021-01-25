@@ -178,20 +178,21 @@ writing this document is 0.026 dollars. [Check the latest
 price](https://cloud.google.com/storage/pricing) for "standard storage"; that is
 the kind of storage you'll primarily use.
 
-#### Tagging a Bucket
+#### Labelling (tagging) a Bucket
 
-Most things in GCP, including cloud storage buckets, support "tags": key-value
-pairs, both which are arbitrary strings. In the Neale Lab, we use the tag key
-"bucket" to enable cost visibility. Be a good citizen of Neale Lab and tag all
-your buckets with the key "bucket" whose value is the bucket's name. For
-example, the following adds the bucket tag for a bucket named `ukbb-ldsc`.
+Most things in GCP, including cloud storage buckets, support "labels": key-value
+pairs, both which are strings, subject to [some constraints](https://cloud.google.com/dataproc/docs/guides/creating-managing-labels#requirements).
+In the Neale Lab, we use the label key "bucket" to enable cost visibility. Be a good
+citizen of Neale Lab and label all your buckets with the key "bucket" whose value is
+the bucket's name. For example, the following adds the bucket label for a bucket
+named `ukbb-ldsc`.
 
 ```
 gsutil label ch -l bucket:ukb-ldsc gs://ukbb-ldsc/
 ```
 
 This might seem redundant, but, unfortunately, the Google billing UI cannot not
-segregate charges by bucket name. However, it *can* segregate charges by tag.
+segregate charges by bucket name. However, it *can* segregate charges by label.
 
 #### Life cycle Management
 
